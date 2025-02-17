@@ -137,12 +137,13 @@ CONTRACT_ABI = [
       "type": "function"
     }
   ]  
-
+if web3.is_connected():
+  print("connected")
+else:
+  print("failed")
 contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=CONTRACT_ABI)
 
 # Ganache test account (use one from Ganache UI)
-WALLET_ADDRESS = "0xYourTestWalletAddress"
-WALLET_PRIVATE_KEY = "YourTestWalletPrivateKey"
 
 def upload_to_ipfs(pdf_file):
     """Uploads PDF to IPFS using a public IPFS node (Pinata, Infura, or local node)."""
@@ -173,6 +174,6 @@ def upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash):
     })
 
     signed_txn = web3.eth.account.sign_transaction(txn, private_key=WALLET_PRIVATE_KEY)
-    txn_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
+    txn_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
 
     return web3.eth.wait_for_transaction_receipt(txn_hash).transactionHash.hex()

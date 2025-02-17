@@ -12,23 +12,19 @@ const PatentForm = () => {
         e.preventDefault();
         const token = localStorage.getItem('token');
 
-        if (!token) {
-            setMessage('You must be logged in to submit a patent.');
-            navigate('/');
-            return;
-        }
+        // if (!token) {
+        //     setMessage('You must be logged in to submit a patent.');
+        //     navigate('/');
+        //     return;
+        // }
 
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('pdf', file);
         formData.append('title', metadata.title);
         formData.append('keywords', metadata.keywords);
 
         try {
-            const response = await axios.post('http://localhost:5000/api/upload', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await axios.post('http://127.0.0.1:8000/api/upload/', formData, {});
             setMessage(response.data.message);
         } catch (error) {
             setMessage('Error submitting patent.');
@@ -48,7 +44,7 @@ const PatentForm = () => {
                 />
                 <input
                     type="text"
-                    placeholder="Keywords"
+                    placeholder="Keywords (comma seperated)"
                     value={metadata.keywords}
                     onChange={(e) => setMetadata({ ...metadata, keywords: e.target.value })}
                     required

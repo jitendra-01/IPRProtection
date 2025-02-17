@@ -43,6 +43,9 @@ function App() {
             setAccount(address);
             console.log("Metamask Connected : " + address);
             setIsConnected(true);
+            // const token = jwt.sign({ wallet: address }, 'your_secret_key', { expiresIn: '1h' });
+            // localStorage.setItem('token', token);
+            // console.log("Generated Token:", token);
         } catch (err) {
             console.error(err);
         }
@@ -68,7 +71,7 @@ function App() {
         />
         <Route 
             path="/home/review-dashboard" 
-            element={isConnected ? <ReviewDashboard Owneraddress={address}/> : <Navigate to="/" />} 
+            element={isConnected ? <ReviewDashboard Owneraddress={account}/> : <Navigate to="/" />} 
         />
       </Routes>
     </Router>
