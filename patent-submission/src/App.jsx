@@ -71,7 +71,7 @@ function App() {
         />
         <Route 
             path="/home/review-dashboard" 
-            element={isConnected ? <ReviewDashboard Owneraddress={account}/> : <Navigate to="/" />} 
+            element={isConnected ? <ReviewDashboard ownerAddress={account}/> : <Navigate to="/" />} 
         />
       </Routes>
     </Router>

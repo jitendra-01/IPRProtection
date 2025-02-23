@@ -1,73 +1,279 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
 
-const ReviewDashboard = (props) => {
-    const [patents, setPatents] = useState([]);
-    const [message, setMessage] = useState('');
-    const navigate = useNavigate();
+const CONTRACT_ADDRESS = "0xf0FFd05090d4a8d0f4581A72d61206d868d0Af22" // Replace with your deployed contract address
+const PatentRegistryABI=[
 
-    useEffect(() => {
-        const fetchPatents = async () => {
-            const token = localStorage.getItem('token');
-
-            if (!token) {
-                setMessage('You must be logged in to access the dashboard.');
-                navigate('/');
-                return;
-            }
-
-            try {
-                const response = await axios.get('http://localhost:5000/review', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                setPatents(response.data);
-            } catch (error) {
-                setMessage('Error fetching patents.');
-            }
-        };
-
-        fetchPatents();
-    }, [navigate]);
-
-    const handleAction = async (id, action) => {
-        const token = localStorage.getItem('token');
-
-        try {
-            const response = await axios.post(
-                `http://localhost:5000/review/${id}`,
-                { action },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            setMessage(response.data.message);
-            setPatents((prev) => prev.filter((patent) => patent.id !== id));
-        } catch (error) {
-            setMessage('Error performing action.');
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "contentHash",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "ipfsHash",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
         }
+      ],
+      "name": "PatentRegistered",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "getAllPatents",
+      "outputs": [
+        {
+          "internalType": "string[]",
+          "name": "titles",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "abstracts",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "metadataList",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "contentHashes",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "ipfsHashes",
+          "type": "string[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "owners",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "timestamps",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "getPatentsByOwner",
+      "outputs": [
+        {
+          "internalType": "string[]",
+          "name": "titles",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "abstracts",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "metadataList",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "contentHashes",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "ipfsHashes",
+          "type": "string[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "timestamps",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_title",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_abstractData",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_metadata",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_contentHash",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_ipfsHash",
+          "type": "string"
+        }
+      ],
+      "name": "registerPatent",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+
+const ADMIN_ADDRESS=""
+
+  const ReviewDashboard = () => {
+    const [patents, setPatents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [provider, setProvider] = useState(null);
+    const [userAddress, setUserAddress] = useState("");
+    const [isAdmin, setIsAdmin] = useState(false);
+  
+    useEffect(() => {
+      if (window.ethereum) {
+        const ethProvider = new ethers.BrowserProvider(window.ethereum);
+        setProvider(ethProvider);
+        connectWallet(ethProvider);
+      } else {
+        console.error("No Ethereum provider found. Please install MetaMask.");
+        setLoading(false);
+      }
+    }, []);
+  
+    const connectWallet = async (ethProvider) => {
+      try {
+        const signer = await ethProvider.getSigner();
+        const address = await signer.getAddress();
+        setUserAddress(address);
+  
+        if (address.toLowerCase() === ADMIN_ADDRESS.toLowerCase()) {
+          setIsAdmin(true);
+          fetchAllPatents(ethProvider);
+        } else {
+          fetchUserPatents(address, ethProvider);
+        }
+      } catch (error) {
+        console.error("Wallet connection failed:", error);
+      }
     };
-
+  
+    const fetchAllPatents = async (ethProvider) => {
+      try {
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, PatentRegistryABI, ethProvider);
+        const [titles, abstracts, metadataList, contentHashes, ipfsHashes, owners, timestamps] = await contract.getAllPatents();
+  
+        const formattedPatents = titles.map((title, index) => ({
+          title,
+          abstractData: abstracts[index].split(".")[0] + ".", // Show only first sentence
+          metadata: metadataList[index],
+          contentHash: contentHashes[index],
+          ipfsHash: ipfsHashes[index],
+          owner: owners[index],
+          timestamp: new Date(Number(timestamps[index]) * 1000).toLocaleString(),
+        }));
+  
+        setPatents(formattedPatents);
+      } catch (error) {
+        console.error("Error fetching all patents:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    const fetchUserPatents = async (address, ethProvider) => {
+      try {
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, PatentRegistryABI, ethProvider);
+        const [titles, abstracts, metadataList, contentHashes, ipfsHashes, timestamps] = await contract.getPatentsByOwner(address);
+  
+        const formattedPatents = titles.map((title, index) => ({
+          title,
+          abstractData: abstracts[index].split(".")[0] + ".", // Show only first sentence
+          metadata: metadataList[index],
+          contentHash: contentHashes[index],
+          ipfsHash: ipfsHashes[index],
+          owner: address,
+          timestamp: new Date(Number(timestamps[index]) * 1000).toLocaleString(),
+        }));
+  
+        setPatents(formattedPatents);
+      } catch (error) {
+        console.error("Error fetching user patents:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
     return (
-        <div>
-            <h1>Review Patents</h1>
-            {message && <p>{message}</p>}
-            <ul>
-                {patents.map((patent) => (
-                    <li key={patent.id}>
-                        <h3>{patent.title}</h3>
-                        <p>Similarity Score: {patent.similarity}%</p>
-                        <button onClick={() => handleAction(patent.id, 'approve')}>Approve</button>
-                        <button onClick={() => handleAction(patent.id, 'reject')}>Reject</button>
-                    </li>
-                ))}
-            </ul>
-        </div>
+      <div style={{ padding: "20px", maxWidth: "800px", margin: "auto" }}>
+        <h1>{isAdmin ? "All Registered Patents" : "Your Patents"}</h1>
+        <p><strong>Connected as:</strong> {userAddress}</p>
+        <p><strong>Role:</strong> {isAdmin ? "Admin" : "User"}</p>
+  
+        {loading ? <p>Loading patents...</p> : (
+          <ul>
+            {patents.length === 0 ? (
+              <p>No patents found.</p>
+            ) : (
+              patents.map((patent, index) => (
+                <li key={index} style={{ borderBottom: "1px solid #ccc", padding: "10px 0" }}>
+                  <h3>
+                    <a
+                      href={`https://dweb.link/ipfs/${patent.ipfsHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ textDecoration: "none", color: "blue", cursor: "pointer" }}
+                    >
+                      {patent.title}
+                    </a>
+                  </h3>
+                  <p><strong>Abstract:</strong> {patent.abstractData}</p>
+                  <p><strong>Metadata:</strong> {patent.metadata}</p>
+                  <p><strong>Owner:</strong> {isAdmin ? patent.owner : "You"}</p>
+                  <p><strong>Registered On:</strong> {patent.timestamp}</p>
+                </li>
+              ))
+            )}
+          </ul>
+        )}
+      </div>
     );
-};
-
-export default ReviewDashboard;
+  };
+  
+  export default ReviewDashboard;

@@ -41,44 +41,43 @@ CONTRACT_ABI = [
       "type": "event"
     },
     {
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "_contentHash",
-          "type": "string"
-        }
-      ],
-      "name": "getPatent",
+      "inputs": [],
+      "name": "getAllPatents",
       "outputs": [
         {
-          "internalType": "string",
-          "name": "title",
-          "type": "string"
+          "internalType": "string[]",
+          "name": "titles",
+          "type": "string[]"
         },
         {
-          "internalType": "string",
-          "name": "abstractData",
-          "type": "string"
+          "internalType": "string[]",
+          "name": "abstracts",
+          "type": "string[]"
         },
         {
-          "internalType": "string",
-          "name": "metadata",
-          "type": "string"
+          "internalType": "string[]",
+          "name": "metadataList",
+          "type": "string[]"
         },
         {
-          "internalType": "string",
-          "name": "ipfsHash",
-          "type": "string"
+          "internalType": "string[]",
+          "name": "contentHashes",
+          "type": "string[]"
         },
         {
-          "internalType": "address",
-          "name": "owner",
-          "type": "address"
+          "internalType": "string[]",
+          "name": "ipfsHashes",
+          "type": "string[]"
         },
         {
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
+          "internalType": "address[]",
+          "name": "owners",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "timestamps",
+          "type": "uint256[]"
         }
       ],
       "stateMutability": "view",
@@ -96,8 +95,33 @@ CONTRACT_ABI = [
       "outputs": [
         {
           "internalType": "string[]",
-          "name": "",
+          "name": "titles",
           "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "abstracts",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "metadataList",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "contentHashes",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "ipfsHashes",
+          "type": "string[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "timestamps",
+          "type": "uint256[]"
         }
       ],
       "stateMutability": "view",
@@ -147,7 +171,7 @@ contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=CONTRACT_ABI)
 WALLET_ADDRESS = "0xaB0b39BA2764291F09B222fF59E8791a461173A0"
 WALLET_PRIVATE_KEY= "587127fc32144295b773de6e100f0952108ab5ba011bed56ed3dcd480b96a26a"
 
-def upload_to_ipfs(pdf_file):
+def upload_to_ipfs(files):
     """Uploads PDF to IPFS using a public IPFS node (Pinata, Infura, or local node)."""
     ipfs_url = "https://api.pinata.cloud/pinning/pinFileToIPFS"  # Replace if using another provider
     headers = {
@@ -166,6 +190,7 @@ def upload_to_ipfs(pdf_file):
         raise Exception(f"Failed to upload to IPFS. Status Code: {response.status_code}, Response: {response.text}")
 
 def upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash):
+    
     """Uploads patent data to the Ethereum blockchain."""
     
     nonce = web3.eth.get_transaction_count(WALLET_ADDRESS)
@@ -185,5 +210,5 @@ def upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash):
 
     signed_txn = web3.eth.account.sign_transaction(txn, private_key=WALLET_PRIVATE_KEY)
     txn_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
-
-    return web3.eth.wait_for_transaction_receipt(txn_hash).transactionHash.hex()
+    receipt = web3.eth.wait_for_transaction_receipt(txn_hash,timeout=600,poll_latency=1)
+    return receipt.transactionHash.hex()
