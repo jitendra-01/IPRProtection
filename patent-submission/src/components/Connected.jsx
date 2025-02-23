@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import './Connected.css';
 
 const Connected = () => {
     return (
-        <>
-            <Link to="/home/patent-form">Create Patent</Link>
-            <br/>
-            <Link to="/home/review-dashboard">Review Dashboard</Link>
-        </>
+        <div className="container">
+            <h1>Choose the next step!</h1>
+            <Link to="/home/patent-form" className="button">Upload document for patent consideration</Link>
+            <Link to="/home/review-dashboard" className="button">Review Dashboard</Link>
+        </div>
     );
 };
 
