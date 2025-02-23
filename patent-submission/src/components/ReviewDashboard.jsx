@@ -157,7 +157,7 @@ const PatentRegistryABI=[
     }
   ]
 
-const ADMIN_ADDRESS=""
+const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
 
   const ReviewDashboard = () => {
     const [patents, setPatents] = useState([]);
@@ -263,7 +263,7 @@ const ADMIN_ADDRESS=""
                       {patent.title}
                     </a>
                   </h3>
-                  <p><strong>Abstract:</strong> {patent.abstractData}</p>
+                  <p><strong>Abstract:</strong> {patent.abstractData}...</p>
                   <p><strong>Metadata:</strong> {patent.metadata}</p>
                   <p><strong>Owner:</strong> {isAdmin ? patent.owner : "You"}</p>
                   <p><strong>Registered On:</strong> {patent.timestamp}</p>
