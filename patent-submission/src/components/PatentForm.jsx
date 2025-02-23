@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import "./PatentForm.css"; 
 
 const PatentForm = () => {
     const [file, setFile] = useState(null);
-    const [metadata, setMetadata] = useState({ title: '', keywords: '' });
+    const [metadata, setMetadata] = useState({ title: '', keywords: '', abstract: ''});
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
@@ -22,6 +24,7 @@ const PatentForm = () => {
         formData.append('pdf', file);
         formData.append('title', metadata.title);
         formData.append('keywords', metadata.keywords);
+        formData.append('abstract', metadata.abstract);
 
         try {
             const response = await axios.post('http://127.0.0.1:8000/api/upload/', formData, {});
@@ -44,18 +47,28 @@ const PatentForm = () => {
                 />
                 <input
                     type="text"
-                    placeholder="Keywords (comma seperated)"
+                    placeholder="Keywords (comma separated)"
                     value={metadata.keywords}
                     onChange={(e) => setMetadata({ ...metadata, keywords: e.target.value })}
+                    required
+                />
+                <input
+                    type="text"
+                    placeholder="Abstract"
+                    value={metadata.abstract}
+                    onChange={(e) => setMetadata({ ...metadata, abstract: e.target.value })}
                     required
                 />
                 <input
                     type="file"
                     onChange={(e) => setFile(e.target.files[0])}
                     required
+                    style={{ color: "white" }}
                 />
+
                 <button type="submit">Submit</button>
             </form>
+            <Link to="/home/review-dashboard" className="button">Review Dashboard</Link>
             {message && <p>{message}</p>}
         </div>
     );
