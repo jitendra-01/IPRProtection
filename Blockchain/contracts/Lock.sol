@@ -6,15 +6,16 @@ contract PatentRegistry {
         string title;
         string abstractData;
         string metadata;
-        string contentHash;  // SHA-256 hash of the content
-        string ipfsHash;     // IPFS CID
+        string contentHash; 
+        string ipfsHash;
         address owner;
         uint256 timestamp;
         bool exists;
     }
 
-    mapping(string => Patent) private patents;  // Mapping from hash to patent data
+    mapping(string => Patent) private patents;  
     mapping(address => string[]) private ownerPatents; // Patents owned by an address
+    string[] private allContentHashes; // Store all content hashes for retrieval
 
     event PatentRegistered(address indexed owner, string contentHash, string ipfsHash, uint256 timestamp);
 
@@ -40,25 +41,81 @@ contract PatentRegistry {
 
         patents[_contentHash] = newPatent;
         ownerPatents[msg.sender].push(_contentHash);
+        allContentHashes.push(_contentHash); // Track all patents
 
         emit PatentRegistered(msg.sender, _contentHash, _ipfsHash, block.timestamp);
     }
 
-    function getPatent(string memory _contentHash) public view returns (
-        string memory title,
-        string memory abstractData,
-        string memory metadata,
-        string memory ipfsHash,
-        address owner,
-        uint256 timestamp
-    ) {
-        require(patents[_contentHash].exists, "Patent not found!");
+    function getPatentsByOwner(address _owner) 
+        public 
+        view 
+        returns (
+            string[] memory titles,
+            string[] memory abstracts,
+            string[] memory metadataList,
+            string[] memory contentHashes,
+            string[] memory ipfsHashes,
+            uint256[] memory timestamps
+        ) 
+    {
+        uint256 count = ownerPatents[_owner].length;
+        titles = new string[](count);
+        abstracts = new string[](count);
+        metadataList = new string[](count);
+        contentHashes = new string[](count);
+        ipfsHashes = new string[](count);
+        timestamps = new uint256[](count);
 
-        Patent memory p = patents[_contentHash];
-        return (p.title, p.abstractData, p.metadata, p.ipfsHash, p.owner, p.timestamp);
+        for (uint256 i = 0; i < count; i++) {
+            string memory contentHash = ownerPatents[_owner][i];
+            Patent memory p = patents[contentHash];
+
+            titles[i] = p.title;
+            abstracts[i] = p.abstractData;
+            metadataList[i] = p.metadata;
+            contentHashes[i] = p.contentHash;
+            ipfsHashes[i] = p.ipfsHash;
+            timestamps[i] = p.timestamp;
+        }
+
+        return (titles, abstracts, metadataList, contentHashes, ipfsHashes, timestamps);
     }
 
-    function getPatentsByOwner(address _owner) public view returns (string[] memory) {
-        return ownerPatents[_owner];
+    function getAllPatents() 
+        public 
+        view 
+        returns (
+            string[] memory titles,
+            string[] memory abstracts,
+            string[] memory metadataList,
+            string[] memory contentHashes,
+            string[] memory ipfsHashes,
+            address[] memory owners,
+            uint256[] memory timestamps
+        ) 
+    {
+        uint256 count = allContentHashes.length;
+        titles = new string[](count);
+        abstracts = new string[](count);
+        metadataList = new string[](count);
+        contentHashes = new string[](count);
+        ipfsHashes = new string[](count);
+        owners = new address[](count);
+        timestamps = new uint256[](count);
+
+        for (uint256 i = 0; i < count; i++) {
+            string memory contentHash = allContentHashes[i];
+            Patent memory p = patents[contentHash];
+
+            titles[i] = p.title;
+            abstracts[i] = p.abstractData;
+            metadataList[i] = p.metadata;
+            contentHashes[i] = p.contentHash;
+            ipfsHashes[i] = p.ipfsHash;
+            owners[i] = p.owner;
+            timestamps[i] = p.timestamp;
+        }
+
+        return (titles, abstracts, metadataList, contentHashes, ipfsHashes, owners, timestamps);
     }
 }
