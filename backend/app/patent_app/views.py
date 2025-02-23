@@ -4,8 +4,7 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from .services.blockchain import upload_to_blockchain, upload_to_ipfs
-import re
-import requests
+from .services.similarity_check import similarity_checker
 
 
 @api_view(["POST"])
@@ -31,7 +30,7 @@ def upload_patent(request):
     # Extract text from PDF
     doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
     pdf_text = " ".join([page.get_text() for page in doc])
-    
+    reports = similarity_checker(pdf_text,title)
     # Compute SHA-256 Hash
     content_hash = hashlib.sha256(pdf_text.encode()).hexdigest()
 
@@ -42,7 +41,7 @@ def upload_patent(request):
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
-    # # Upload data to blockchain
+    # # # Upload data to blockchain
     try:
         txn_hash = upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash)
     except Exception as e:
@@ -56,5 +55,6 @@ def upload_patent(request):
     return Response({
         "message": "Patent successfully uploaded",
         "blockchain_tx": txn_hash,
-        "ipfs_hash": ipfs_hash
+        "ipfs_hash": ipfs_hash,
+        "report":reports
     }, status=201)
