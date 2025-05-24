@@ -1,7 +1,7 @@
 body {
-    background: linear-gradient(135deg, #7F00FF, #E100FF);
+    background:linear-gradient(135deg, #7F00FF, #E100FF);;
     font-family: Arial, sans-serif;
-    color: white;
+    color: rgb(7, 7, 7);
     margin: 0;
     padding: 0;
     display: flex;

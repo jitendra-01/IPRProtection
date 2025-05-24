@@ -21,12 +21,13 @@ const PatentForm = () => {
         // }
 
         const formData = new FormData();
-        formData.append('pdf', file);
+        formData.append('file', file);
         formData.append('title', metadata.title);
         formData.append('keywords', metadata.keywords);
         formData.append('abstract', metadata.abstract);
 
         try {
+
             const response = await axios.post('http://127.0.0.1:8000/api/upload/', formData, {});
             setMessage(response.data.message);
         } catch (error) {

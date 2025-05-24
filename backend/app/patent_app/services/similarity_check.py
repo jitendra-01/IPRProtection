@@ -13,6 +13,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from gensim.models import Word2Vec
 from gensim.utils import simple_preprocess
 from nltk.tokenize import sent_tokenize, word_tokenize
+from sentence_transformers import SentenceTransformer
 
 GANACHE_URL="https://eth-sepolia.g.alchemy.com/v2/7K8Kf7K5s0UwJv8sJiHy2-AwegVewk1s"
 web3 = Web3(Web3.HTTPProvider(GANACHE_URL))
@@ -222,6 +223,20 @@ def word2vec_similarity(text1, text2):
 
     return cosine_similarity([vec1], [vec2])[0][0]
 
+# def generate_embedding(text):
+#     model = SentenceTransformer('all-MiniLM-L6-v2')
+#     text1 = remove_special_characters(text)
+#     text1 = preprocess_text(text)
+#     return model.encode(text, convert_to_numpy=True)
+
+def generate_embedding(text1,text2):
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    vec1 = model.encode(text1, convert_to_numpy=True)
+    vec2 = model.encode(text2, convert_to_numpy=True)
+    # print(vec1)
+    # print(vec2)
+    return cosine_similarity([vec1], [vec2])[0][0]
+
 # Function to find longest common subsequence (LCS)
 def find_lcs(text1, text2):
     seq_matcher = difflib.SequenceMatcher(None, text1, text2)
@@ -249,7 +264,8 @@ def generate_similarity_report(text1, text2,title1,title2):
     tfidf_sim = tfidf_similarity(text1, text2)
     # print(tfidf_sim)
     word2vec_sim = word2vec_similarity(text1, text2)
-    print(word2vec_sim)
+    bert_sim = generate_embedding(text1,text2)
+    # print(bert_sim)
     common_phrase = find_lcs(text1, text2)
     common_words = highlight_similar_words(text1, text2)
 
@@ -257,7 +273,7 @@ def generate_similarity_report(text1, text2,title1,title2):
         "File 1": title1,
         "File 2": title2,
         "SHA-256 Hash Match": "Yes" if exact_match else "No",
-        "TF-IDF Cosine Similarity": round(tfidf_sim * 100, 2),
+        "TF-IDF Cosine Similarity": round(bert_sim*100,2),
         # "Word2Vec Cosine Similarity": round(word2vec_sim * 100, 2),
         "Longest Common Phrase": common_phrase if len(common_phrase) > 10 else "None",
         "Common Words": list(common_words)[:10],  

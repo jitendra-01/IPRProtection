@@ -203,7 +203,7 @@ const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
   
         const formattedPatents = titles.map((title, index) => ({
           title,
-          abstractData: abstracts[index].split(".")[0] + ".", // Show only first sentence
+          abstractData: abstracts[index].split(".")[0] + "...", // Show only first sentence
           metadata: metadataList[index],
           contentHash: contentHashes[index],
           ipfsHash: ipfsHashes[index],
@@ -243,7 +243,7 @@ const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
     };
   
     return (
-      <div style={{ padding: "20px", maxWidth: "800px", margin: "auto" }}>
+      <div style={{ padding: "20px", maxWidth: "1200px", margin: "auto", overflowY: "auto",  wordWrap: "break-word", overflowWrap: "break-word"}}>
         <h1>{isAdmin ? "All Registered Patents" : "Your Patents"}</h1>
         <p style={{fontSize:"18px"}}><strong>Connected as:</strong> {userAddress}</p>
         <p style={{fontSize:"18px"}}><strong>Role:</strong> {isAdmin ? "Admin" : "User"}</p>
@@ -253,7 +253,7 @@ const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
             {patents.length === 0 ? (
               <p style={{fontSize:"18px"}}>No patents found.</p>
             ) : (
-              patents.map((patent, index) => (
+              patents.slice(1).map((patent, index) => (
                 <li key={index} style={{ borderBottom: "1px solid #ccc", padding: "10px 0" }}>
                   <h3>
                     <a
@@ -265,10 +265,8 @@ const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
                       {patent.title}
                     </a>
                   </h3>
-                  <p><strong>Abstract:</strong> {patent.abstractData}...</p>
-                  <p><strong>Metadata:</strong> {patent.metadata}</p>
-                  <p><strong>Owner:</strong> {isAdmin ? patent.owner : "You"}</p>
-                  <p><strong>Registered On:</strong> {patent.timestamp}</p>
+                  <p>{patent.abstractData}...</p>
+                  <p><strong>Metadata:</strong> {patent.metadata}&nbsp;&nbsp;&nbsp; <strong>Owner:</strong> {isAdmin ? patent.owner : "You"}&nbsp;&nbsp;&nbsp;<strong>Registered On:</strong> {patent.timestamp}</p>
                 </li>
               ))
             )}
