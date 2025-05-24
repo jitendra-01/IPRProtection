@@ -6,7 +6,7 @@ import "./PatentForm.css";
 
 const PatentForm = () => {
     const [file, setFile] = useState(null);
-    const [metadata, setMetadata] = useState({ title: '', keywords: '', abstract: ''});
+    const [metadata, setMetadata] = useState({ title: '', keywords: '', abstract: '',email: ''});
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
@@ -25,6 +25,7 @@ const PatentForm = () => {
         formData.append('title', metadata.title);
         formData.append('keywords', metadata.keywords);
         formData.append('abstract', metadata.abstract);
+        formData.append('email', metadata.email);
 
         try {
 
@@ -39,6 +40,13 @@ const PatentForm = () => {
         <div>
             <h1>Submit Patent</h1>
             <form onSubmit={handleSubmit}>
+                <input
+                    type="email"
+                    placeholder="Your Email"
+                    value={metadata.email}
+                    onChange={(e) => setMetadata({ ...metadata, email: e.target.value })}
+                    required
+                />
                 <input
                     type="text"
                     placeholder="Title"

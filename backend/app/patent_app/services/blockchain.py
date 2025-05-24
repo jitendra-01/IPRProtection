@@ -214,4 +214,7 @@ def upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash):
     signed_txn = web3.eth.account.sign_transaction(txn, private_key=WALLET_PRIVATE_KEY)
     txn_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
     receipt = web3.eth.wait_for_transaction_receipt(txn_hash,timeout=6000,poll_latency=1)
+    # logs = contract.events.PatentRegistered().process_receipt(receipt)
+    # return logs[0]['args']['patentId']
     return receipt.transactionHash.hex()
+    

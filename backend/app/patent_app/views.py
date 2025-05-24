@@ -6,6 +6,7 @@ from rest_framework.parsers import MultiPartParser
 from .services.blockchain import upload_to_blockchain, upload_to_ipfs
 from .services.similarity_check import similarity_checker
 from web3 import Web3
+from django.core.mail import send_mail
 
 GANACHE_URL="https://eth-sepolia.g.alchemy.com/v2/7K8Kf7K5s0UwJv8sJiHy2-AwegVewk1s"
 web3 = Web3(Web3.HTTPProvider(GANACHE_URL))
@@ -167,7 +168,7 @@ CONTRACT_ABI = [
 contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=CONTRACT_ABI)
 
 
-def send_mail(to_email, subject, body):
+def sendmail(to_email, subject, body):
     send_mail(
         subject,
         body,
@@ -216,7 +217,9 @@ def upload_patent(request):
     # # # Upload data to blockchain
     try:
         reports = similarity_checker(pdf_text,title)
-        txn_hash = upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash)
+        # txn_hash = upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash)
+        body=""
+        sendmail(email,"regarding IPR registration",body)
     except Exception as e:
         error_message = str(e)
         if "execution reverted" in error_message:
@@ -227,7 +230,7 @@ def upload_patent(request):
 
     return Response({
         "message": "Patent successfully uploaded",
-        "blockchain_tx": txn_hash,
+        # "blockchain_tx": txn_hash,
         "ipfs_hash": ipfs_hash,
         "report":reports
     }, status=201)
