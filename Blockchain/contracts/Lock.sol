@@ -57,8 +57,11 @@ contract PatentRegistry {
         string memory _accepted,
         SimilarityRecord[] memory _topSimilarities
     ) public returns (string memory) {
-
-        string memory newPatentId = generatePatentId();
+        string memory newPatentId = "0";
+        if (keccak256(bytes(_accepted)) == keccak256(bytes("yes"))){
+            newPatentId = generatePatentId();
+        }
+        
 
         Patent storage newPatent = patents[newPatentId];
         newPatent.patentId = newPatentId;

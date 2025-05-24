@@ -18,8 +18,194 @@ from sentence_transformers import SentenceTransformer
 GANACHE_URL="https://eth-sepolia.g.alchemy.com/v2/7K8Kf7K5s0UwJv8sJiHy2-AwegVewk1s"
 web3 = Web3(Web3.HTTPProvider(GANACHE_URL))
 
-CONTRACT_ADDRESS = "0xf0FFd05090d4a8d0f4581A72d61206d868d0Af22"
+# CONTRACT_ADDRESS = "0xf0FFd05090d4a8d0f4581A72d61206d868d0Af22"
+# CONTRACT_ABI = [
+#     {
+#       "anonymous": False,
+#       "inputs": [
+#         {
+#           "indexed": True,
+#           "internalType": "address",
+#           "name": "owner",
+#           "type": "address"
+#         },
+#         {
+#           "indexed": False,
+#           "internalType": "string",
+#           "name": "contentHash",
+#           "type": "string"
+#         },
+#         {
+#           "indexed": False,
+#           "internalType": "string",
+#           "name": "ipfsHash",
+#           "type": "string"
+#         },
+#         {
+#           "indexed": False,
+#           "internalType": "uint256",
+#           "name": "timestamp",
+#           "type": "uint256"
+#         }
+#       ],
+#       "name": "PatentRegistered",
+#       "type": "event"
+#     },
+#     {
+#       "inputs": [],
+#       "name": "getAllPatents",
+#       "outputs": [
+#         {
+#           "internalType": "string[]",
+#           "name": "titles",
+#           "type": "string[]"
+#         },
+#         {
+#           "internalType": "string[]",
+#           "name": "abstracts",
+#           "type": "string[]"
+#         },
+#         {
+#           "internalType": "string[]",
+#           "name": "metadataList",
+#           "type": "string[]"
+#         },
+#         {
+#           "internalType": "string[]",
+#           "name": "contentHashes",
+#           "type": "string[]"
+#         },
+#         {
+#           "internalType": "string[]",
+#           "name": "ipfsHashes",
+#           "type": "string[]"
+#         },
+#         {
+#           "internalType": "address[]",
+#           "name": "owners",
+#           "type": "address[]"
+#         },
+#         {
+#           "internalType": "uint256[]",
+#           "name": "timestamps",
+#           "type": "uint256[]"
+#         }
+#       ],
+#       "stateMutability": "view",
+#       "type": "function"
+#     },
+#     {
+#       "inputs": [
+#         {
+#           "internalType": "address",
+#           "name": "_owner",
+#           "type": "address"
+#         }
+#       ],
+#       "name": "getPatentsByOwner",
+#       "outputs": [
+#         {
+#           "internalType": "string[]",
+#           "name": "titles",
+#           "type": "string[]"
+#         },
+#         {
+#           "internalType": "string[]",
+#           "name": "abstracts",
+#           "type": "string[]"
+#         },
+#         {
+#           "internalType": "string[]",
+#           "name": "metadataList",
+#           "type": "string[]"
+#         },
+#         {
+#           "internalType": "string[]",
+#           "name": "contentHashes",
+#           "type": "string[]"
+#         },
+#         {
+#           "internalType": "string[]",
+#           "name": "ipfsHashes",
+#           "type": "string[]"
+#         },
+#         {
+#           "internalType": "uint256[]",
+#           "name": "timestamps",
+#           "type": "uint256[]"
+#         }
+#       ],
+#       "stateMutability": "view",
+#       "type": "function"
+#     },
+#     {
+#       "inputs": [
+#         {
+#           "internalType": "string",
+#           "name": "_title",
+#           "type": "string"
+#         },
+#         {
+#           "internalType": "string",
+#           "name": "_abstractData",
+#           "type": "string"
+#         },
+#         {
+#           "internalType": "string",
+#           "name": "_metadata",
+#           "type": "string"
+#         },
+#         {
+#           "internalType": "string",
+#           "name": "_contentHash",
+#           "type": "string"
+#         },
+#         {
+#           "internalType": "string",
+#           "name": "_ipfsHash",
+#           "type": "string"
+#         }
+#       ],
+#       "name": "registerPatent",
+#       "outputs": [],
+#       "stateMutability": "nonpayable",
+#       "type": "function"
+#     }
+#   ]
+
+CONTRACT_ADDRESS = "0x93f66BC1B9E9abe405519171d045432ca34D95D6"
 CONTRACT_ABI = [
+    {
+      "anonymous": False,
+      "inputs": [
+        {
+          "indexed": True,
+          "internalType": "string",
+          "name": "patentId",
+          "type": "string"
+        },
+        {
+          "indexed": True,
+          "internalType": "address",
+          "name": "oldOwner",
+          "type": "address"
+        },
+        {
+          "indexed": True,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        },
+        {
+          "indexed": False,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
     {
       "anonymous": False,
       "inputs": [
@@ -32,7 +218,7 @@ CONTRACT_ABI = [
         {
           "indexed": False,
           "internalType": "string",
-          "name": "contentHash",
+          "name": "patentId",
           "type": "string"
         },
         {
@@ -56,30 +242,93 @@ CONTRACT_ABI = [
       "name": "getAllPatents",
       "outputs": [
         {
-          "internalType": "string[]",
-          "name": "titles",
-          "type": "string[]"
-        },
+          "components": [
+            {
+              "internalType": "string",
+              "name": "patentId",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "abstractData",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "metadata",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "contentHash",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "ipfsHash",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "patentId",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "score",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct PatentRegistry.SimilarityRecord[]",
+              "name": "topSimilarities",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "string",
+              "name": "accepted",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct PatentRegistry.Patent[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
         {
-          "internalType": "string[]",
-          "name": "abstracts",
-          "type": "string[]"
-        },
-        {
-          "internalType": "string[]",
-          "name": "metadataList",
-          "type": "string[]"
-        },
-        {
-          "internalType": "string[]",
-          "name": "contentHashes",
-          "type": "string[]"
-        },
-        {
-          "internalType": "string[]",
-          "name": "ipfsHashes",
-          "type": "string[]"
-        },
+          "internalType": "string",
+          "name": "_patentId",
+          "type": "string"
+        }
+      ],
+      "name": "getOwnershipHistoryWithTimestamps",
+      "outputs": [
         {
           "internalType": "address[]",
           "name": "owners",
@@ -97,6 +346,94 @@ CONTRACT_ABI = [
     {
       "inputs": [
         {
+          "internalType": "string",
+          "name": "_patentId",
+          "type": "string"
+        }
+      ],
+      "name": "getPatentByPatentId",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "patentId",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "abstractData",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "metadata",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "contentHash",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "ipfsHash",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "patentId",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "score",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct PatentRegistry.SimilarityRecord[]",
+              "name": "topSimilarities",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "string",
+              "name": "accepted",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct PatentRegistry.Patent",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "_owner",
           "type": "address"
@@ -105,34 +442,78 @@ CONTRACT_ABI = [
       "name": "getPatentsByOwner",
       "outputs": [
         {
-          "internalType": "string[]",
-          "name": "titles",
-          "type": "string[]"
-        },
-        {
-          "internalType": "string[]",
-          "name": "abstracts",
-          "type": "string[]"
-        },
-        {
-          "internalType": "string[]",
-          "name": "metadataList",
-          "type": "string[]"
-        },
-        {
-          "internalType": "string[]",
-          "name": "contentHashes",
-          "type": "string[]"
-        },
-        {
-          "internalType": "string[]",
-          "name": "ipfsHashes",
-          "type": "string[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "timestamps",
-          "type": "uint256[]"
+          "components": [
+            {
+              "internalType": "string",
+              "name": "patentId",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "abstractData",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "metadata",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "contentHash",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "ipfsHash",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "patentId",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "score",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct PatentRegistry.SimilarityRecord[]",
+              "name": "topSimilarities",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "string",
+              "name": "accepted",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct PatentRegistry.Patent[]",
+          "name": "",
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
@@ -164,9 +545,55 @@ CONTRACT_ABI = [
           "internalType": "string",
           "name": "_ipfsHash",
           "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_accepted",
+          "type": "string"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "patentId",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "score",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct PatentRegistry.SimilarityRecord[]",
+          "name": "_topSimilarities",
+          "type": "tuple[]"
         }
       ],
       "name": "registerPatent",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_patentId",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "_newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
