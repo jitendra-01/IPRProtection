@@ -6,7 +6,8 @@ import Login from './components/Login';
 import Connected from './components/Connected';
 import PatentForm from './components/PatentForm';
 import ReviewDashboard from './components/ReviewDashboard';
-
+import TransferOwnership from './components/transfer_ownership'
+import OwnershipHistoryViewer from './components/CheckHistory'
 
 function App() {
     // useEffect( () => {
@@ -72,6 +73,14 @@ function App() {
         <Route 
             path="/home/review-dashboard" 
             element={isConnected ? <ReviewDashboard ownerAddress={account}/> : <Navigate to="/" />} 
+        />
+        <Route 
+          path="/home/transfer-ownership" 
+          element={isConnected ? <TransferOwnership /> : <Navigate to="/" />}  
+        />
+        <Route 
+          path="/home/check-history" 
+          element={isConnected  ? <OwnershipHistoryViewer /> : <Navigate to="/" />} 
         />
       </Routes>
     </Router>

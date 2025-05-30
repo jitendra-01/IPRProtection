@@ -78,6 +78,8 @@ const PatentForm = () => {
                 <button type="submit">Submit</button>
             </form>
             <Link to="/home/review-dashboard" className="button">Review Dashboard</Link>
+            <Link to="/home/transfer-ownership" className="button">Transfer-Ownership</Link>
+            <Link to="/home/check-history" className="button">Check Ownership History</Link>
             {message && <p>{message}</p>}
         </div>
     );

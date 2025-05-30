@@ -166,8 +166,8 @@ web3 = Web3(Web3.HTTPProvider(GANACHE_URL))
 #     }
 #   ]
 
-CONTRACT_ADDRESS = "0x93f66BC1B9E9abe405519171d045432ca34D95D6"
-CONTRACT_ABI = [
+CONTRACT_ADDRESS = "0x2E9E4577fc6A8525491010081f28B98de1208B14"
+CONTRACT_ABI =   [
     {
       "anonymous": False,
       "inputs": [
@@ -280,28 +280,6 @@ CONTRACT_ABI = [
               "internalType": "bool",
               "name": "exists",
               "type": "bool"
-            },
-            {
-              "components": [
-                {
-                  "internalType": "string",
-                  "name": "patentId",
-                  "type": "string"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "score",
-                  "type": "uint256"
-                }
-              ],
-              "internalType": "struct PatentRegistry.SimilarityRecord[]",
-              "name": "topSimilarities",
-              "type": "tuple[]"
-            },
-            {
-              "internalType": "string",
-              "name": "accepted",
-              "type": "string"
             }
           ],
           "internalType": "struct PatentRegistry.Patent[]",
@@ -392,33 +370,30 @@ CONTRACT_ABI = [
               "internalType": "bool",
               "name": "exists",
               "type": "bool"
-            },
-            {
-              "components": [
-                {
-                  "internalType": "string",
-                  "name": "patentId",
-                  "type": "string"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "score",
-                  "type": "uint256"
-                }
-              ],
-              "internalType": "struct PatentRegistry.SimilarityRecord[]",
-              "name": "topSimilarities",
-              "type": "tuple[]"
-            },
-            {
-              "internalType": "string",
-              "name": "accepted",
-              "type": "string"
             }
           ],
           "internalType": "struct PatentRegistry.Patent",
           "name": "",
           "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_contentHash",
+          "type": "string"
+        }
+      ],
+      "name": "getPatentIdByHash",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
         }
       ],
       "stateMutability": "view",
@@ -480,28 +455,6 @@ CONTRACT_ABI = [
               "internalType": "bool",
               "name": "exists",
               "type": "bool"
-            },
-            {
-              "components": [
-                {
-                  "internalType": "string",
-                  "name": "patentId",
-                  "type": "string"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "score",
-                  "type": "uint256"
-                }
-              ],
-              "internalType": "struct PatentRegistry.SimilarityRecord[]",
-              "name": "topSimilarities",
-              "type": "tuple[]"
-            },
-            {
-              "internalType": "string",
-              "name": "accepted",
-              "type": "string"
             }
           ],
           "internalType": "struct PatentRegistry.Patent[]",
@@ -538,28 +491,6 @@ CONTRACT_ABI = [
           "internalType": "string",
           "name": "_ipfsHash",
           "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_accepted",
-          "type": "string"
-        },
-        {
-          "components": [
-            {
-              "internalType": "string",
-              "name": "patentId",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "score",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct PatentRegistry.SimilarityRecord[]",
-          "name": "_topSimilarities",
-          "type": "tuple[]"
         }
       ],
       "name": "registerPatent",
@@ -645,7 +576,8 @@ def upload_patent(request):
     # # # Upload data to blockchain
     try:
         reports = similarity_checker(pdf_text,title)
-        # txn_hash = upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash)
+        txn_hash = upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash)
+        print(txn_hash)
         body=""
         sendmail(email,"regarding IPR registration",body)
     except Exception as e:
@@ -658,7 +590,7 @@ def upload_patent(request):
 
     return Response({
         "message": "Patent successfully uploaded",
-        # "blockchain_tx": txn_hash,
+        "blockchain_tx": txn_hash,
         "ipfs_hash": ipfs_hash,
         "report":reports
     }, status=201)

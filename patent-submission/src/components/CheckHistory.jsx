@@ -1,190 +1,33 @@
-from web3 import Web3
-import json
-import requests
+import React, { useState } from "react";
+import { ethers } from "ethers";
+import { format } from "date-fns";
 
-GANACHE_URL="https://eth-sepolia.g.alchemy.com/v2/7K8Kf7K5s0UwJv8sJiHy2-AwegVewk1s"
-web3 = Web3(Web3.HTTPProvider(GANACHE_URL))
-
-# CONTRACT_ADDRESS = "0xf0FFd05090d4a8d0f4581A72d61206d868d0Af22"
-# CONTRACT_ABI = [
-#     {
-#       "anonymous": False,
-#       "inputs": [
-#         {
-#           "indexed": True,
-#           "internalType": "address",
-#           "name": "owner",
-#           "type": "address"
-#         },
-#         {
-#           "indexed": False,
-#           "internalType": "string",
-#           "name": "contentHash",
-#           "type": "string"
-#         },
-#         {
-#           "indexed": False,
-#           "internalType": "string",
-#           "name": "ipfsHash",
-#           "type": "string"
-#         },
-#         {
-#           "indexed": False,
-#           "internalType": "uint256",
-#           "name": "timestamp",
-#           "type": "uint256"
-#         }
-#       ],
-#       "name": "PatentRegistered",
-#       "type": "event"
-#     },
-#     {
-#       "inputs": [],
-#       "name": "getAllPatents",
-#       "outputs": [
-#         {
-#           "internalType": "string[]",
-#           "name": "titles",
-#           "type": "string[]"
-#         },
-#         {
-#           "internalType": "string[]",
-#           "name": "abstracts",
-#           "type": "string[]"
-#         },
-#         {
-#           "internalType": "string[]",
-#           "name": "metadataList",
-#           "type": "string[]"
-#         },
-#         {
-#           "internalType": "string[]",
-#           "name": "contentHashes",
-#           "type": "string[]"
-#         },
-#         {
-#           "internalType": "string[]",
-#           "name": "ipfsHashes",
-#           "type": "string[]"
-#         },
-#         {
-#           "internalType": "address[]",
-#           "name": "owners",
-#           "type": "address[]"
-#         },
-#         {
-#           "internalType": "uint256[]",
-#           "name": "timestamps",
-#           "type": "uint256[]"
-#         }
-#       ],
-#       "stateMutability": "view",
-#       "type": "function"
-#     },
-#     {
-#       "inputs": [
-#         {
-#           "internalType": "address",
-#           "name": "_owner",
-#           "type": "address"
-#         }
-#       ],
-#       "name": "getPatentsByOwner",
-#       "outputs": [
-#         {
-#           "internalType": "string[]",
-#           "name": "titles",
-#           "type": "string[]"
-#         },
-#         {
-#           "internalType": "string[]",
-#           "name": "abstracts",
-#           "type": "string[]"
-#         },
-#         {
-#           "internalType": "string[]",
-#           "name": "metadataList",
-#           "type": "string[]"
-#         },
-#         {
-#           "internalType": "string[]",
-#           "name": "contentHashes",
-#           "type": "string[]"
-#         },
-#         {
-#           "internalType": "string[]",
-#           "name": "ipfsHashes",
-#           "type": "string[]"
-#         },
-#         {
-#           "internalType": "uint256[]",
-#           "name": "timestamps",
-#           "type": "uint256[]"
-#         }
-#       ],
-#       "stateMutability": "view",
-#       "type": "function"
-#     },
-#     {
-#       "inputs": [
-#         {
-#           "internalType": "string",
-#           "name": "_title",
-#           "type": "string"
-#         },
-#         {
-#           "internalType": "string",
-#           "name": "_abstractData",
-#           "type": "string"
-#         },
-#         {
-#           "internalType": "string",
-#           "name": "_metadata",
-#           "type": "string"
-#         },
-#         {
-#           "internalType": "string",
-#           "name": "_contentHash",
-#           "type": "string"
-#         },
-#         {
-#           "internalType": "string",
-#           "name": "_ipfsHash",
-#           "type": "string"
-#         }
-#       ],
-#       "name": "registerPatent",
-#       "outputs": [],
-#       "stateMutability": "nonpayable",
-#       "type": "function"
-#     }
-#   ]
-
-CONTRACT_ADDRESS = "0x2E9E4577fc6A8525491010081f28B98de1208B14"
-CONTRACT_ABI =   [
+// Replace with your actual contract address and ABI
+const CONTRACT_ADDRESS = "0x2E9E4577fc6A8525491010081f28B98de1208B14"
+const CONTRACT_ABI =   [
     {
-      "anonymous": False,
+      "anonymous": false,
       "inputs": [
         {
-          "indexed": True,
+          "indexed": true,
           "internalType": "string",
           "name": "patentId",
           "type": "string"
         },
         {
-          "indexed": True,
+          "indexed": true,
           "internalType": "address",
           "name": "oldOwner",
           "type": "address"
         },
         {
-          "indexed": True,
+          "indexed": true,
           "internalType": "address",
           "name": "newOwner",
           "type": "address"
         },
         {
-          "indexed": False,
+          "indexed": false,
           "internalType": "uint256",
           "name": "timestamp",
           "type": "uint256"
@@ -194,28 +37,28 @@ CONTRACT_ABI =   [
       "type": "event"
     },
     {
-      "anonymous": False,
+      "anonymous": false,
       "inputs": [
         {
-          "indexed": True,
+          "indexed": true,
           "internalType": "address",
           "name": "owner",
           "type": "address"
         },
         {
-          "indexed": False,
+          "indexed": false,
           "internalType": "string",
           "name": "patentId",
           "type": "string"
         },
         {
-          "indexed": False,
+          "indexed": false,
           "internalType": "string",
           "name": "ipfsHash",
           "type": "string"
         },
         {
-          "indexed": False,
+          "indexed": false,
           "internalType": "uint256",
           "name": "timestamp",
           "type": "uint256"
@@ -519,61 +362,84 @@ CONTRACT_ABI =   [
   ]
 
 
-if web3.is_connected():
-  print("connected")
-else:
-  print("failed")
-contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=CONTRACT_ABI)
+const OwnershipHistoryViewer = () => {
+  const [patentId, setPatentId] = useState("");
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-# WALLET_ADDRESS = "0xaB0b39BA2764291F09B222fF59E8791a461173A0"
-# WALLET_PRIVATE_KEY = "587127fc32144295b773de6e100f0952108ab5ba011bed56ed3dcd480b96a26a "
+  const getOwnershipHistory = async () => {
+    setLoading(true);
+    setError("");
+    setHistory([]);
 
-WALLET_ADDRESS = "0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
-WALLET_PRIVATE_KEY = "77ed4fb9d47540d71e9b5d8b673f886dc539d90b2febe9da9210f7d4024fc2c7"
+    try {
+      if (!window.ethereum) throw new Error("Please install MetaMask");
 
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
-def upload_to_ipfs(files):
-    """Uploads PDF to IPFS using a public IPFS node (Pinata, Infura, or local node)."""
-    ipfs_url = "https://api.pinata.cloud/pinning/pinFileToIPFS"  # Replace if using another provider
-    headers = {
-        "pinata_api_key": "e51e86f57ba01788c14e",
-        "pinata_secret_api_key": "aaf3d7e2804eec7d7dabb1822473695f20b77541651003ed9d48c409d31dae94",
+      const [owners, timestamps] = await contract.getOwnershipHistoryWithTimestamps(patentId);
+
+      const formatted = owners.map((owner, i) => ({
+        owner,
+        timestamp: new Date(timestamps[i].toNumber() * 1000) // Convert from UNIX to JS Date
+      }));
+
+      setHistory(formatted);
+    } catch (err) {
+      console.error(err);
+      setError(err.reason || err.message || "Error fetching ownership history");
     }
-  
-    # print(files)
-    response = requests.request("POST", ipfs_url, headers=headers, files=files)
 
-    print(response.json())
+    setLoading(false);
+  };
 
-    if response.status_code == 200:
-        return response.json()["IpfsHash"]
-    else:
-        raise Exception("Failed to upload to IPFS")
+  return (
+    <div className="p-4 max-w-xl mx-auto">
+      <h1 className="text-xl font-bold mb-4">View Patent Ownership History</h1>
 
-def upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash):
-    
-    """Uploads patent data to the Ethereum blockchain."""
-    # const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-    # const userAddress = accounts[0]; 
-    nonce =web3.eth.get_transaction_count(WALLET_ADDRESS)
+      <input
+        type="text"
+        className="border p-2 w-full mb-2"
+        placeholder="Enter Patent ID"
+        value={patentId}
+        onChange={(e) => setPatentId(e.target.value)}
+      />
+      <button
+        onClick={getOwnershipHistory}
+        className="bg-blue-600 text-white px-4 py-2 rounded"
+        disabled={loading}
+      >
+        {loading ? "Loading..." : "Fetch History"}
+      </button>
 
-    gas_estimate =contract.functions.registerPatent(
-      title, abstract, metadata, content_hash, ipfs_hash
-    ).estimate_gas({'from': WALLET_ADDRESS})
+      {error && <div className="text-red-600 mt-2">{error}</div>}
 
-    txn = contract.functions.registerPatent(
-        title, abstract, metadata, content_hash, ipfs_hash
-    ).build_transaction({
-        'from': WALLET_ADDRESS,
-        'nonce': nonce, 
-        'gas': int(gas_estimate * 1.2), 
-        'gasPrice': web3.eth.gas_price,
-    })
+      {history.length > 0 && (
+        <table className="mt-4 w-full border text-sm">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border px-2 py-1 text-left">Owner Address</th>
+              <th className="border px-2 py-1 text-left">Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {history.map((record, i) => (
+              <tr key={i}>
+                <td className="border px-2 py-1">{record.owner}</td>
+                <td className="border px-2 py-1">
+                  {format(record.timestamp, "yyyy-MM-dd HH:mm:ss")}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+};
 
-    signed_txn = web3.eth.account.sign_transaction(txn, private_key=WALLET_PRIVATE_KEY)
-    txn_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
-    receipt = web3.eth.wait_for_transaction_receipt(txn_hash,timeout=6000,poll_latency=1)
-    # logs = contract.events.PatentRegistered().process_receipt(receipt)
-    # return logs[0]['args']['patentId']
-    return receipt.transactionHash.hex()
-    
+export default OwnershipHistoryViewer;

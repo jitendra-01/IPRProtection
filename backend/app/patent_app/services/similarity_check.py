@@ -666,7 +666,7 @@ def generate_similarity_report(text1, text2,title1,title2):
 
     return report
 
-def similarity_checker(file1,title): 
+def similarity_checker(file1,patentId): 
 
     try:
         reports = []

@@ -2,11 +2,6 @@
 pragma solidity ^0.8.19;
 
 contract PatentRegistry {
-    struct SimilarityRecord {
-        string patentId;
-        uint256 score; // similarity score multiplied by 10000
-    }
-
     struct OwnershipRecord {
         address owner;
         uint256 timestamp;
@@ -22,8 +17,6 @@ contract PatentRegistry {
         address owner;
         uint256 timestamp;
         bool exists;
-        SimilarityRecord[] topSimilarities;
-        string accepted;
     }
 
     uint256 private patentCounter = 0;
@@ -32,6 +25,8 @@ contract PatentRegistry {
     mapping(string => string) private hashToPatentId;
     mapping(address => string[]) private ownerPatents;
     mapping(string => OwnershipRecord[]) private ownershipHistory;
+
+
     string[] private allPatentIds;
 
     event PatentRegistered(address indexed owner, string patentId, string ipfsHash, uint256 timestamp);
@@ -53,15 +48,9 @@ contract PatentRegistry {
         string memory _abstractData,
         string memory _metadata,
         string memory _contentHash,
-        string memory _ipfsHash,
-        string memory _accepted,
-        SimilarityRecord[] memory _topSimilarities
+        string memory _ipfsHash
     ) public returns (string memory) {
-        string memory newPatentId = "0";
-        if (keccak256(bytes(_accepted)) == keccak256(bytes("yes"))){
-            newPatentId = generatePatentId();
-        }
-        
+        string memory newPatentId = generatePatentId();
 
         Patent storage newPatent = patents[newPatentId];
         newPatent.patentId = newPatentId;
@@ -73,17 +62,6 @@ contract PatentRegistry {
         newPatent.owner = msg.sender;
         newPatent.timestamp = block.timestamp;
         newPatent.exists = true;
-        newPatent.accepted = _accepted;
-
-
-        for (uint256 i = 0; i < _topSimilarities.length; i++) {
-            newPatent.topSimilarities.push(
-                SimilarityRecord({
-                    patentId: _topSimilarities[i].patentId,
-                    score: _topSimilarities[i].score
-                })
-            );
-        }
 
         hashToPatentId[_contentHash] = newPatentId;
         ownerPatents[msg.sender].push(newPatentId);
@@ -98,12 +76,17 @@ contract PatentRegistry {
         return newPatentId;
     }
 
+    function getPatentIdByHash(string memory _contentHash) public view returns (string memory) {
+        return hashToPatentId[_contentHash];
+    }
+
+
     function transferOwnership(string memory _patentId, address _newOwner)
         public
         onlyPatentOwner(_patentId)
     {
         require(_newOwner != address(0), "Invalid new owner address");
-
+        require(msg.sender == patents[_patentId].owner, "Access denied: Not the current owner");
         address oldOwner = patents[_patentId].owner;
         patents[_patentId].owner = _newOwner;
 
@@ -132,6 +115,7 @@ contract PatentRegistry {
         returns (address[] memory owners, uint256[] memory timestamps)
     {
         require(patents[_patentId].exists, "Patent does not exist");
+        require(msg.sender == patents[_patentId].owner, "Access denied: Not the current owner");
 
         uint256 count = ownershipHistory[_patentId].length;
         owners = new address[](count);
@@ -190,36 +174,4 @@ contract PatentRegistry {
         }
         str = string(bstr);
     }
-
-    // function updatePatent(
-    //     string memory _patentId,
-    //     string memory _title,
-    //     string memory _abstractData,
-    //     string memory _metadata,
-    //     string memory _ipfsHash,
-    //     string memory _accepted,
-    //     SimilarityRecord[] memory _topSimilarities
-    // ) public onlyPatentOwner(_patentId) {
-
-    // require(patents[_patentId].exists, "Patent does not exist");
-
-    // Patent storage patent = patents[_patentId];
-    // patent.title = _title;
-    // patent.abstractData = _abstractData;
-    // patent.metadata = _metadata;
-    // patent.ipfsHash = _ipfsHash;
-    // patent.accepted = _accepted;
-
-    // // Replace similarities
-    // delete patent.topSimilarities;
-    // for (uint256 i = 0; i < _topSimilarities.length; i++) {
-    //     patent.topSimilarities.push(
-    //         SimilarityRecord({
-    //             patentId: _topSimilarities[i].patentId,
-    //             score: _topSimilarities[i].score
-    //         })
-    //     );
-    // }
-    // }
-
 }
