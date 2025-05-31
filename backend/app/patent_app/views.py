@@ -536,6 +536,15 @@ def sendmail(to_email, subject, body):
         fail_silently=False,
     )
 
+def get_patent_id_by_hash(content_hash):
+    try:
+        patent_id = contract.functions.getPatentIdByHash(content_hash).call()
+        return patent_id
+    except Exception as e:
+        print(f"Blockchain error: {str(e)}")
+        return None
+
+
 @api_view(["POST"])
 @parser_classes([MultiPartParser])
 def upload_patent(request):
@@ -564,11 +573,11 @@ def upload_patent(request):
     content_hash = hashlib.sha256(pdf_text.encode()).hexdigest()
 
     # Upload PDF to IPFS
-    pdf_file.seek(0)
-    try:
-        ipfs_hash = upload_to_ipfs(files)
-    except Exception as e:
-        return Response({"error": str(e)}, status=500)
+    # pdf_file.seek(0)
+    # try:
+    #     ipfs_hash = upload_to_ipfs(files)
+    # except Exception as e:
+    #     return Response({"error": str(e)}, status=500)
     
     # similarity check
     # reports = similarity_checker(pdf_text,title)
@@ -576,8 +585,19 @@ def upload_patent(request):
     # # # Upload data to blockchain
     try:
         reports = similarity_checker(pdf_text,title)
+        print('x')
+        print(reports)
+        pdf_file.seek(0)
+        try:
+            ipfs_hash = upload_to_ipfs(files)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
         txn_hash = upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash)
         print(txn_hash)
+
+
+        patent_id=get_patent_id_by_hash(content_hash)
+        print(patent_id)
         body=""
         sendmail(email,"regarding IPR registration",body)
     except Exception as e:
