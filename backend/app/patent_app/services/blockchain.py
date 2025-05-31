@@ -528,7 +528,9 @@ contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=CONTRACT_ABI)
 # WALLET_ADDRESS = "0xaB0b39BA2764291F09B222fF59E8791a461173A0"
 # WALLET_PRIVATE_KEY = "587127fc32144295b773de6e100f0952108ab5ba011bed56ed3dcd480b96a26a "
 
+# WALLET_ADDRESS = "0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
 WALLET_ADDRESS = "0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
+# WALLET_PRIVATE_KEY = "77ed4fb9d47540d71e9b5d8b673f886dc539d90b2febe9da9210f7d4024fc2c7"
 WALLET_PRIVATE_KEY = "77ed4fb9d47540d71e9b5d8b673f886dc539d90b2febe9da9210f7d4024fc2c7"
 
 
@@ -575,5 +577,5 @@ def upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash):
     receipt = web3.eth.wait_for_transaction_receipt(txn_hash,timeout=6000,poll_latency=1)
     # logs = contract.events.PatentRegistered().process_receipt(receipt)
     # return logs[0]['args']['patentId']
-    return receipt.transactionHash.hex()
+    return receipt
     

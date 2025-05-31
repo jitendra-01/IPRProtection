@@ -363,19 +363,19 @@ const PatentRegistryABI =   [
   ]
 
 
-const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
+const ADMIN_ADDRESS=""
 
   const ReviewDashboard = () => {
     const [patents, setPatents] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [provider, setProvider] = useState(null);
+    // const [provider, setProvider] = useState(null);
     const [userAddress, setUserAddress] = useState("");
     const [isAdmin, setIsAdmin] = useState(false);
   
     useEffect(() => {
       if (window.ethereum) {
         const ethProvider = new ethers.BrowserProvider(window.ethereum);
-        setProvider(ethProvider);
+        // setProvider(ethProvider);
         connectWallet(ethProvider);
       } else {
         console.error("No Ethereum provider found. Please install MetaMask.");
@@ -391,29 +391,18 @@ const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
   
         if (address.toLowerCase() === ADMIN_ADDRESS.toLowerCase()) {
           setIsAdmin(true);
-          fetchAllPatents(ethProvider);
+          fetchAllPatents(signer);
         } else {
-          fetchUserPatents(address, ethProvider);
+          fetchUserPatents(address, signer);
         }
       } catch (error) {
         console.error("Wallet connection failed:", error);
       }
     };
   
-    const fetchAllPatents = async (ethProvider) => {
+    const fetchAllPatents = async (signer) => {
       try {
-        const contract = new ethers.Contract(CONTRACT_ADDRESS, PatentRegistryABI, ethProvider);
-        // const [titles, abstracts, metadataList, contentHashes, ipfsHashes, owners, timestamps] = await contract.getAllPatents();
-  
-        // const formattedPatents = titles.map((title, index) => ({
-        //   title,
-        //   abstractData: abstracts[index].split(".")[0] + "...", // Show only first sentence
-        //   metadata: metadataList[index],
-        //   contentHash: contentHashes[index],
-        //   ipfsHash: ipfsHashes[index],
-        //   owner: owners[index],
-        //   timestamp: new Date(Number(timestamps[index]) * 1000).toLocaleString(),
-        // }));
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, PatentRegistryABI, signer);
 
         const patentsArray = await contract.getAllPatents();
 
@@ -435,9 +424,9 @@ const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
       }
     };
   
-    const fetchUserPatents = async (address, ethProvider) => {
+    const fetchUserPatents = async (address, signer) => {
       try {
-        const contract = new ethers.Contract(CONTRACT_ADDRESS, PatentRegistryABI, ethProvider);
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, PatentRegistryABI, signer);
         // const [patent_id, titles, abstracts, metadataList, contentHashes, ipfsHashes, owner, timestamps] = await contract.getPatentsByOwner(address);
   
         // const formattedPatents = titles.map((title, index) => ({
@@ -449,9 +438,10 @@ const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
         //   owner: address,
         //   timestamp: new Date(Number(timestamps[index]) * 1000).toLocaleString(),
         // }));
-        const patentsArray = await contract.getPatentsByOwner();
+        const patentsArray = await contract.getPatentsByOwner(address);
 
         const formattedPatents = patentsArray.map((patent) => ({
+          patentId: patent.patentId,
           title: patent.title,
           abstractData: patent.abstractData.split(".")[0] + ".", // First sentence
           metadata: patent.metadata,
@@ -493,7 +483,7 @@ const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
                     </a>
                   </h3>
                   <p>{patent.abstractData}...</p>
-                  <p><strong>Metadata:</strong> {patent.metadata}&nbsp;&nbsp;&nbsp; <strong>Owner:</strong> {isAdmin ? patent.owner : "You"}&nbsp;&nbsp;&nbsp;<strong>Registered On:</strong> {patent.timestamp}</p>
+                  <p><strong>patent_id:{patent.patentId}</strong></p><p><strong>Metadata:</strong> {patent.metadata}&nbsp;&nbsp;&nbsp; <strong>Owner:</strong> {isAdmin ? patent.owner : "You"}&nbsp;&nbsp;&nbsp;<strong>Registered On:</strong> {patent.timestamp}</p>
                 </li>
               ))
             )}

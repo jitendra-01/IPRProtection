@@ -376,16 +376,20 @@ const OwnershipHistoryViewer = () => {
     try {
       if (!window.ethereum) throw new Error("Please install MetaMask");
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
+      // const provider = new ethers.Web3Provider(window.ethereum);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      // await provider.send("eth_requestAccounts", []);
+      const signer = await provider.getSigner();
+      const address = await signer.getAddress();
+      // print(address)
+      console.log(address);
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
       const [owners, timestamps] = await contract.getOwnershipHistoryWithTimestamps(patentId);
 
       const formatted = owners.map((owner, i) => ({
         owner,
-        timestamp: new Date(timestamps[i].toNumber() * 1000) // Convert from UNIX to JS Date
+        timestamp: new Date(Number(timestamps[i]) * 1000) // Convert from UNIX to JS Date
       }));
 
       setHistory(formatted);

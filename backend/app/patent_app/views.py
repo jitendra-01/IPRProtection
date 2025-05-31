@@ -635,17 +635,17 @@ def transfer_ownership(request):
 
         # Build and sign transaction
         nonce =web3.eth.get_transaction_count(sender_address)
-        gas_estimate =contract.functions.registerPatent(
+        gas_estimate =contract.functions.transferOwnership(
         patent_id,new_owner
         ).estimate_gas({'from': sender_address})
         txn = contract.functions.transferOwnership(patent_id, new_owner).build_transaction({
             'from': sender_address,
             'nonce': nonce,
-            'gas': 300000,
-            'gasPrice': web3.to_wei('5', 'gwei'),
+            'gas': int(gas_estimate * 1.2),
+            'gasPrice': web3.eth.gas_price,
         })
         signed_txn = web3.eth.account.sign_transaction(txn, private_key=private_key)
-        tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        tx_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
         tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
 
         return Response({
