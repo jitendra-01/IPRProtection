@@ -4,162 +4,6 @@ import "./ReviewDashboard.css";
 
 import { Link } from 'react-router-dom';
 
-// const CONTRACT_ADDRESS = "0xf0FFd05090d4a8d0f4581A72d61206d868d0Af22" // Replace with your deployed contract address.
-// const PatentRegistryABI=[
-
-//     {
-//       "anonymous": false,
-//       "inputs": [
-//         {
-//           "indexed": true,
-//           "internalType": "address",
-//           "name": "owner",
-//           "type": "address"
-//         },
-//         {
-//           "indexed": false,
-//           "internalType": "string",
-//           "name": "contentHash",
-//           "type": "string"
-//         },
-//         {
-//           "indexed": false,
-//           "internalType": "string",
-//           "name": "ipfsHash",
-//           "type": "string"
-//         },
-//         {
-//           "indexed": false,
-//           "internalType": "uint256",
-//           "name": "timestamp",
-//           "type": "uint256"
-//         }
-//       ],
-//       "name": "PatentRegistered",
-//       "type": "event"
-//     },
-//     {
-//       "inputs": [],
-//       "name": "getAllPatents",
-//       "outputs": [
-//         {
-//           "internalType": "string[]",
-//           "name": "titles",
-//           "type": "string[]"
-//         },
-//         {
-//           "internalType": "string[]",
-//           "name": "abstracts",
-//           "type": "string[]"
-//         },
-//         {
-//           "internalType": "string[]",
-//           "name": "metadataList",
-//           "type": "string[]"
-//         },
-//         {
-//           "internalType": "string[]",
-//           "name": "contentHashes",
-//           "type": "string[]"
-//         },
-//         {
-//           "internalType": "string[]",
-//           "name": "ipfsHashes",
-//           "type": "string[]"
-//         },
-//         {
-//           "internalType": "address[]",
-//           "name": "owners",
-//           "type": "address[]"
-//         },
-//         {
-//           "internalType": "uint256[]",
-//           "name": "timestamps",
-//           "type": "uint256[]"
-//         }
-//       ],
-//       "stateMutability": "view",
-//       "type": "function"
-//     },
-//     {
-//       "inputs": [
-//         {
-//           "internalType": "address",
-//           "name": "_owner",
-//           "type": "address"
-//         }
-//       ],
-//       "name": "getPatentsByOwner",
-//       "outputs": [
-//         {
-//           "internalType": "string[]",
-//           "name": "titles",
-//           "type": "string[]"
-//         },
-//         {
-//           "internalType": "string[]",
-//           "name": "abstracts",
-//           "type": "string[]"
-//         },
-//         {
-//           "internalType": "string[]",
-//           "name": "metadataList",
-//           "type": "string[]"
-//         },
-//         {
-//           "internalType": "string[]",
-//           "name": "contentHashes",
-//           "type": "string[]"
-//         },
-//         {
-//           "internalType": "string[]",
-//           "name": "ipfsHashes",
-//           "type": "string[]"
-//         },
-//         {
-//           "internalType": "uint256[]",
-//           "name": "timestamps",
-//           "type": "uint256[]"
-//         }
-//       ],
-//       "stateMutability": "view",
-//       "type": "function"
-//     },
-//     {
-//       "inputs": [
-//         {
-//           "internalType": "string",
-//           "name": "_title",
-//           "type": "string"
-//         },
-//         {
-//           "internalType": "string",
-//           "name": "_abstractData",
-//           "type": "string"
-//         },
-//         {
-//           "internalType": "string",
-//           "name": "_metadata",
-//           "type": "string"
-//         },
-//         {
-//           "internalType": "string",
-//           "name": "_contentHash",
-//           "type": "string"
-//         },
-//         {
-//           "internalType": "string",
-//           "name": "_ipfsHash",
-//           "type": "string"
-//         }
-//       ],
-//       "name": "registerPatent",
-//       "outputs": [],
-//       "stateMutability": "nonpayable",
-//       "type": "function"
-//     }
-//   ]
-
 const CONTRACT_ADDRESS = "0x2E9E4577fc6A8525491010081f28B98de1208B14"
 const PatentRegistryABI =   [
     {
@@ -559,16 +403,28 @@ const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
     const fetchAllPatents = async (ethProvider) => {
       try {
         const contract = new ethers.Contract(CONTRACT_ADDRESS, PatentRegistryABI, ethProvider);
-        const [titles, abstracts, metadataList, contentHashes, ipfsHashes, owners, timestamps] = await contract.getAllPatents();
+        // const [titles, abstracts, metadataList, contentHashes, ipfsHashes, owners, timestamps] = await contract.getAllPatents();
   
-        const formattedPatents = titles.map((title, index) => ({
-          title,
-          abstractData: abstracts[index].split(".")[0] + "...", // Show only first sentence
-          metadata: metadataList[index],
-          contentHash: contentHashes[index],
-          ipfsHash: ipfsHashes[index],
-          owner: owners[index],
-          timestamp: new Date(Number(timestamps[index]) * 1000).toLocaleString(),
+        // const formattedPatents = titles.map((title, index) => ({
+        //   title,
+        //   abstractData: abstracts[index].split(".")[0] + "...", // Show only first sentence
+        //   metadata: metadataList[index],
+        //   contentHash: contentHashes[index],
+        //   ipfsHash: ipfsHashes[index],
+        //   owner: owners[index],
+        //   timestamp: new Date(Number(timestamps[index]) * 1000).toLocaleString(),
+        // }));
+
+        const patentsArray = await contract.getAllPatents();
+
+        const formattedPatents = patentsArray.map((patent) => ({
+          title: patent.title,
+          abstractData: patent.abstractData.split(".")[0] + ".", // First sentence
+          metadata: patent.metadata,
+          contentHash: patent.contentHash,
+          ipfsHash: patent.ipfsHash,
+          owner: patent.owner,
+          timestamp: new Date(Number(patent.timestamp) * 1000).toLocaleString(),
         }));
   
         setPatents(formattedPatents);
@@ -582,18 +438,29 @@ const ADMIN_ADDRESS="0x7a7577FC751Ee24b4540804528ced6BAe0E4b0fE"
     const fetchUserPatents = async (address, ethProvider) => {
       try {
         const contract = new ethers.Contract(CONTRACT_ADDRESS, PatentRegistryABI, ethProvider);
-        const [titles, abstracts, metadataList, contentHashes, ipfsHashes, timestamps] = await contract.getPatentsByOwner(address);
+        // const [patent_id, titles, abstracts, metadataList, contentHashes, ipfsHashes, owner, timestamps] = await contract.getPatentsByOwner(address);
   
-        const formattedPatents = titles.map((title, index) => ({
-          title,
-          abstractData: abstracts[index].split(".")[0] + ".", // Show only first sentence
-          metadata: metadataList[index],
-          contentHash: contentHashes[index],
-          ipfsHash: ipfsHashes[index],
-          owner: address,
-          timestamp: new Date(Number(timestamps[index]) * 1000).toLocaleString(),
+        // const formattedPatents = titles.map((title, index) => ({
+        //   title,
+        //   abstractData: abstracts[index].split(".")[0] + ".", // Show only first sentence
+        //   metadata: metadataList[index],
+        //   contentHash: contentHashes[index],
+        //   ipfsHash: ipfsHashes[index],
+        //   owner: address,
+        //   timestamp: new Date(Number(timestamps[index]) * 1000).toLocaleString(),
+        // }));
+        const patentsArray = await contract.getPatentsByOwner();
+
+        const formattedPatents = patentsArray.map((patent) => ({
+          title: patent.title,
+          abstractData: patent.abstractData.split(".")[0] + ".", // First sentence
+          metadata: patent.metadata,
+          contentHash: patent.contentHash,
+          ipfsHash: patent.ipfsHash,
+          owner: patent.owner,
+          timestamp: new Date(Number(patent.timestamp) * 1000).toLocaleString(),
         }));
-  
+
         setPatents(formattedPatents);
       } catch (error) {
         console.error("Error fetching user patents:", error);
