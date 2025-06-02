@@ -585,21 +585,43 @@ def upload_patent(request):
     # # # Upload data to blockchain
     try:
         reports = similarity_checker(pdf_text,title)
-        print('x')
+        # print('x')
         print(reports)
-        pdf_file.seek(0)
-        try:
-            ipfs_hash = upload_to_ipfs(files)
-        except Exception as e:
-            return Response({"error": str(e)}, status=500)
-        txn_hash = upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash)
-        print(txn_hash)
+
+        max_report = max(reports, key=lambda r: r["TF-IDF Cosine Similarity"])
+        if max_report["TF-IDF Cosine Similarity"] > 50:
+          patent_id = max_report["Patent_id"]
+          plag = max_report["TF-IDF Cosine Similarity"]
+          print(plag)
+          # result = {
+          #   "Patent_id": max_report["Patent_id"],
+          #   "TF-IDF Cosine Similarity": max_report["TF-IDF Cosine Similarity"]
+          # }
+          body=f"Following the analysis of your recent patent submission, our system has identified a notable similarity with an existing patent. The comparison indicates a similarity score of {plag} angainst patent with patent_id of {patent_id}, which exceeds our threshold for potential content overlap."
+          sendmail(email,"regarding IPR registration",body)
+          return Response({
+            "message": "Patent not registered due to exceeding plag",
+            # "blockchain_tx": txn_hash,
+            # "ipfs_hash": ipfs_hash,
+            "report":reports
+    }, status=201)
+        else:
+            # result = None
+
+          pdf_file.seek(0)
+          try:
+              ipfs_hash = upload_to_ipfs(files)
+          except Exception as e:
+              return Response({"error": str(e)}, status=500)
+          txn_hash = upload_to_blockchain(title, abstract, metadata, content_hash, ipfs_hash)
+          print(txn_hash)
 
 
-        patent_id=get_patent_id_by_hash(content_hash)
-        print(patent_id)
-        body=""
-        sendmail(email,"regarding IPR registration",body)
+          patent_idnew=get_patent_id_by_hash(content_hash)
+          print(patent_idnew)
+          body=f"We are pleased to inform you that your patent submission titled {title} has been successfully received and registered.Your patent id is {patent_idnew}"
+
+          sendmail(email,"regarding IPR registration",body)
     except Exception as e:
         error_message = str(e)
         if "execution reverted" in error_message:
@@ -612,7 +634,6 @@ def upload_patent(request):
         "message": "Patent successfully uploaded",
         "blockchain_tx": txn_hash,
         "ipfs_hash": ipfs_hash,
-        "report":reports
     }, status=201)
 
 

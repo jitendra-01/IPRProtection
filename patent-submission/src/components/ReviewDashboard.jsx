@@ -470,7 +470,7 @@ const ADMIN_ADDRESS=""
             {patents.length === 0 ? (
               <p style={{fontSize:"18px"}}>No patents found.</p>
             ) : (
-              patents.slice(1).map((patent, index) => (
+              patents.slice(0).map((patent, index) => (
                 <li key={index} style={{ borderBottom: "1px solid #ccc", padding: "10px 0" }}>
                   <h3>
                     <a
